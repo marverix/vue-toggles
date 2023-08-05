@@ -1,32 +1,20 @@
-<template>
-  <span
-    class="vue-toggles"
-    :style="bgStyle"
-    role="switch"
-    tabindex="0"
-    :aria-checked="value ? 'true' : 'false'"
-    :aria-readonly="disabled ? 'true' : 'false'"
-    @click="!disabled ? $emit('click', value) : null"
-    @keyup.enter.prevent="!disabled ? $emit('click', value) : null"
-    @keyup.space.prevent="!disabled ? $emit('click', value) : null"
-  >
-    <span aria-hidden="true" :style="dotStyle" class="dot">
-      <span v-show="checkedText && value" :style="textStyle" class="text">
-        {{ checkedText }}
-      </span>
+<script lang="ts">
+/**
+ * vue-toggles
+ * @author Julian <https://github.com/juliandreas>
+ * @license MIT
+ * @link https://github.com/juliandreas/vue-toggles
+ * Modified by marverix to work with Vue.js 3 + TypeScript
+ */
 
-      <span v-show="uncheckedText && !value" :style="textStyle" class="text">
-        {{ uncheckedText }}
-      </span>
-    </span>
-  </span>
-</template>
+import { defineComponent } from 'vue';
 
-<script>
-export default {
+export default defineComponent({
+
   name: 'VueToggles',
+
   props: {
-    value: {
+    modelValue: {
       type: Boolean,
       default: false,
     },
@@ -47,11 +35,11 @@ export default {
       default: null,
     },
     width: {
-      type: [Number, String],
+      type: Number,
       default: 75,
     },
     height: {
-      type: [Number, String],
+      type: Number,
       default: 25,
     },
     uncheckedBg: {
@@ -67,7 +55,7 @@ export default {
       default: '#fff',
     },
     fontSize: {
-      type: [Number, String],
+      type: String,
       default: '12',
     },
     checkedColor: {
@@ -79,11 +67,25 @@ export default {
       default: '#fff',
     },
     fontWeight: {
-      type: [Number, String],
+      type: String,
       default: 'normal',
     },
   },
+
+  emits: ['update:modelValue'],
+
   computed: {
+
+    value: {
+      get() {
+        return this.modelValue;
+      },
+
+      set(value: boolean) {
+        this.$emit('update:modelValue', value)
+      }
+    },
+
     bgStyle() {
       const styles = {
         width: `${this.width}px`,
@@ -95,6 +97,7 @@ export default {
 
       return styles;
     },
+
     dotStyle() {
       const styles = {
         background: this.dotColor,
@@ -106,13 +109,14 @@ export default {
       };
 
       if ((!this.value && this.reverse) || (this.value && !this.reverse)) {
-        styles.marginLeft = `${this.width - (this.height - 3)}px`;
+        styles['margin-left'] = `${this.width - (this.height - 3)}px`;
       } else if ((this.value && this.reverse) || (!this.value && !this.reverse)) {
-        styles.marginLeft = '5px';
+        styles['margin-left'] = '5px';
       }
 
       return styles;
     },
+
     textStyle() {
       const styles = {
         'font-weight': this.fontWeight,
@@ -131,10 +135,46 @@ export default {
       }
 
       return styles;
-    },
+    }
+
   },
-};
+
+  methods: {
+    toggle() {
+      if (this.disabled) {
+        return;
+      }
+      
+      this.value = !this.value;
+    }
+  }
+
+});
 </script>
+
+<template>
+  <span
+    class="vue-toggles"
+    :style="bgStyle"
+    role="switch"
+    tabindex="0"
+    :aria-checked="value ? 'true' : 'false'"
+    :aria-readonly="disabled ? 'true' : 'false'"
+    @click="toggle"
+    @keyup.enter.prevent="toggle"
+    @keyup.space.prevent="toggle"
+  >
+    <span aria-hidden="true" :style="dotStyle" class="dot">
+      <span v-show="checkedText && value" :style="textStyle" class="text">
+        {{ checkedText }}
+      </span>
+
+      <span v-show="uncheckedText && !value" :style="textStyle" class="text">
+        {{ uncheckedText }}
+      </span>
+    </span>
+  </span>
+</template>
 
 <style>
 .vue-toggles {
